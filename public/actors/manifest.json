@@ -1,0 +1,44 @@
+[
+  {
+    "id": "mira",
+    "name": "Mira",
+    "url": "/actors/mira.glb",
+    "license": "CC0-1.0",
+    "source": "Original procedural geometry generated in this repository",
+    "sha256": "2685e552a6106e8b115454c2e705a66f4c4f65e914562a9c223435cfbfafb3d2",
+    "morphs": [
+      "FaceWidth",
+      "EyeSize"
+    ],
+    "outfits": [
+      "Casual",
+      "Suit"
+    ],
+    "animations": [
+      "Idle",
+      "Wave"
+    ],
+    "bones": 7
+  },
+  {
+    "id": "ren",
+    "name": "Ren",
+    "url": "/actors/ren.glb",
+    "license": "CC0-1.0",
+    "source": "Original procedural geometry generated in this repository",
+    "sha256": "8962b67340c895cabf0e7c3d4cad0f201dd64047b2f330a6482255aef8acc536",
+    "morphs": [
+      "FaceWidth",
+      "EyeSize"
+    ],
+    "outfits": [
+      "Casual",
+      "Suit"
+    ],
+    "animations": [
+      "Idle",
+      "Wave"
+    ],
+    "bones": 7
+  }
+]

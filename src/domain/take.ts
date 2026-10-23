@@ -110,6 +110,13 @@ export type Take = {
   requestId: string;
   baseTakeId: string | null;
   createdAt: string;
+  completedAt?: string;
+  archive?: {
+    hash: string;
+    bytes: number;
+    storedAt: string;
+    source: "provider" | "recovered-stage4";
+  };
   status: TakeStatus;
   videoId: string | null;
   progress: number | null;

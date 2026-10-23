@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-23T21:26:05.6003698Z",
+  "mode": "Fresh source snapshot, no .env.local, no private media, no copied node_modules",
+  "checks": [
+    {
+      "phase": "npm ci",
+      "ok": true,
+      "durationMs": 49886
+    },
+    {
+      "phase": "doctor",
+      "ok": true,
+      "durationMs": 1681
+    },
+    {
+      "phase": "typecheck",
+      "ok": true,
+      "durationMs": 5614
+    },
+    {
+      "phase": "unit",
+      "ok": true,
+      "durationMs": 3727
+    },
+    {
+      "phase": "build",
+      "ok": true,
+      "durationMs": 14068
+    },
+    {
+      "phase": "secrets",
+      "ok": true,
+      "durationMs": 838
+    }
+  ]
+}

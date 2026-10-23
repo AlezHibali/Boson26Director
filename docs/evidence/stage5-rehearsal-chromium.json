@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-23T21:25:55.140Z",
+  "browser": "chromium",
+  "version": "156.0.8078.4",
+  "mode": "HTTP/WS fixtures, real WebGL and Web Audio, synthetic microphone",
+  "rounds": 3,
+  "matchingSnapshots": true,
+  "tracksEnded": true,
+  "previousVideoPaused": true,
+  "preGeneratedLabel": true,
+  "mockedSubmissions": 1,
+  "consoleErrors": []
+}

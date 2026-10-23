@@ -7,9 +7,11 @@ import type { SceneController } from "@/studio/controller";
 export default function VoiceDirector({
   controller,
   takes,
+  onSession,
 }: {
   controller: SceneController;
   takes: TakeController;
+  onSession?: (session: VoiceSession | null) => void;
 }) {
   const [session] = useState(
     () =>
@@ -50,6 +52,10 @@ export default function VoiceDirector({
         online: () => navigator.onLine,
       }),
   );
+  useEffect(() => {
+    onSession?.(session);
+    return () => onSession?.(null);
+  }, [onSession, session]);
   const state = useSyncExternalStore(
     session.subscribe,
     session.getSnapshot,
@@ -139,6 +145,9 @@ export default function VoiceDirector({
                 <span>
                   {tool.message}
                   {tool.cached ? "（复用结果）" : ""} · REV {tool.revision}
+                  {tool.elapsedMs !== undefined
+                    ? " · 执行 " + tool.elapsedMs + " ms"
+                    : ""}
                 </span>
                 <details>
                   <summary>参数</summary>

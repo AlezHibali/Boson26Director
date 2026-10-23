@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "assets:generate": "tsx scripts/generate-actors.ts",
     "test:unit": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
     "test:live": "tsx scripts/live-smoke.ts",
     "test:live:browser": "tsx scripts/live-browser.ts",
     "test": "npm run test:unit",
@@ -25,7 +25,15 @@
     "test:stage3": "vitest run tests/unit/voice-tools.test.ts tests/unit/voice-session.test.ts",
     "test:stage4": "vitest run tests/unit/takes.test.ts tests/unit/take-controller.test.ts",
     "test:stage4:e2e": "playwright test takes.spec.ts",
-    "test:stage4:live": "tsx scripts/stage4-live.ts"
+    "test:stage4:live": "tsx scripts/stage4-live.ts",
+    "doctor": "tsx scripts/doctor.ts",
+    "verify": "tsx scripts/verify.ts",
+    "test:demo": "playwright test demo.spec.ts",
+    "test:api:http": "playwright test api.spec.ts --project=chromium",
+    "release:info": "tsx scripts/release-info.ts",
+    "test:stage5:live": "tsx scripts/stage5-live.ts",
+    "demo:recover-stage4": "tsx scripts/stage5-cache.ts",
+    "test:clean": "pwsh -NoProfile -File scripts/check-clean-install.ps1"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",
@@ -49,5 +57,8 @@
     "vitest": "^4.0.18",
     "ws": "^8.19.0"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  }
 }

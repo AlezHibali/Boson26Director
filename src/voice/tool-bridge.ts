@@ -13,6 +13,7 @@ export type ToolLog = {
   message: string;
   revision: number;
   cached?: boolean;
+  elapsedMs?: number;
 };
 export type EffectHandler = (
   name: string,
@@ -33,6 +34,7 @@ export type ToolScope = {
   continueResponse: () => void;
 };
 type Call = {
+  receivedAt: number;
   call_id: string;
   name: string;
   arguments: string;
@@ -100,6 +102,7 @@ export class ToolBridge {
       )
         continue;
       const call: Call = {
+        receivedAt: performance.now(),
         call_id: item.call_id,
         name: item.name,
         arguments:
@@ -250,6 +253,7 @@ export class ToolBridge {
           : output.message,
         revision: output.revision,
         cached: call.entry?.owner !== id,
+        elapsedMs: Math.round(performance.now() - call.receivedAt),
       });
       scope.send({
         type: "conversation.item.create",

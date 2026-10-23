@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { operationFor, type MetricInput } from "./metrics";
 export class ApiError extends Error {
   constructor(
     public code: string,
@@ -88,8 +89,35 @@ export class BosonClient {
     private apiKey: string,
     private timeoutMs = 30000,
     private transport: typeof fetch = fetch,
+    private observe?: (value: MetricInput) => void,
   ) {}
   private async request(
+    path: string,
+    init: RequestInit = {},
+    expected = "application/json",
+  ) {
+    const start = performance.now(),
+      operation = operationFor(path);
+    const report = (outcome: "ok" | "error") => {
+      if (operation)
+        try {
+          this.observe?.({
+            operation,
+            durationMs: performance.now() - start,
+            outcome,
+          });
+        } catch {}
+    };
+    try {
+      const response = await this.performRequest(path, init, expected);
+      report("ok");
+      return response;
+    } catch (e) {
+      report("error");
+      throw e;
+    }
+  }
+  private async performRequest(
     path: string,
     init: RequestInit = {},
     expected = "application/json",

@@ -225,6 +225,20 @@ export function createTakeController(deps: Deps) {
   }
   return {
     store,
+    archive: async (id: string) => {
+      try {
+        upsert(
+          await request("/api/takes/" + id + "/archive", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: "{}",
+          }),
+        );
+        store.setState({ error: "" });
+      } catch (e) {
+        store.setState({ error: (e as Error).message });
+      }
+    },
     refresh,
     upsert,
     stopPlayback,

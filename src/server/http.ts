@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { recordMetric } from "./metrics";
 import { ApiError, BosonClient } from "./boson";
 export function client() {
   const configured = Number(process.env.BOSON_TIMEOUT_MS || 30000);
@@ -7,6 +8,8 @@ export function client() {
     Number.isFinite(configured)
       ? Math.max(1000, Math.min(configured, 120000))
       : 30000,
+    fetch,
+    recordMetric,
   );
 }
 export const noStore = {

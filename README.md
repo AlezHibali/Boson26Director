@@ -1,10 +1,23 @@
 # AI Director Studio
 
-Stage 4 · 情绪表演、持久化 Take 历史与非破坏性 Retake。
+Stage 5 · 可重复演示、双浏览器联调与本地交付。
 
 首页支持中英文语音导演，并保留角色、外形、服装、动作、摄影机和灯光的手动控件。语音与按钮共用 SceneController / SceneStore；工具去重、原子复合操作、打断和断线恢复均已接入。Action 会冻结当前外形、服装、台词与情绪，生成可播放的 Take；Retake 只修改来源 Take 的情绪。第一阶段的诊断保留在 /lab。
 
 ![Take history](docs/evidence/stage4-live-takes.png)
+
+## 演示与交付
+
+一键准备演示、预生成回放标识、本地 MP4 归档、启动预检和独立测试环境已接入。见 [演示手册](docs/DEMO_RUNBOOK.md)、[第五阶段验收](docs/STAGE5_VALIDATION.md) 与 [交付说明](docs/DELIVERY.md)。真实物理设备与主观情绪、公开视频和远程交付 SHA 仍须分别验收。
+
+```powershell
+npm run doctor
+pwsh -NoProfile -File scripts/start-local.ps1 -Mode demo
+# 完整默认回归，真实生成服务与个人数据库不参与：
+npm run verify
+npm run test:clean
+npm run release:info
+```
 
 ## 本地启动
 
@@ -31,7 +44,7 @@ npm run dev
 3. 在 Take 历史选择记录回放。选择不会改动舞台；生成结束也不会自动切换当前选择。
 4. 选择来源 Take，设置 Retake 情绪并点击重拍，或说“保持其他不变，只改成愤怒，再来一次”。
 5. Cut 停止本地视频与助手回复；生成中的云端任务继续运行。恢复来源片场需单独点击“恢复此 Take 的片场”。
-6. 刷新和重启后，从 .data/takes.sqlite 恢复记录与人像。参考图保留在本地，视频由同源接口向供应商取回，不保证永久可用。
+6. 完成后点击“保存本地回放”，将原 MP4 原子保存到 .data/media，支持本地 Range 播放。供应商未归档的视频不保证永久可用。刷新和重启后从 .data/takes.sqlite 恢复记录、参考图和归档映射。
 
 同一时间最多一个 Avatar 任务，Lab 也共享限制。未知提交不会自动重试；先检查历史和 Boson，可关联已确认的 video ID，或确认未接收后解除本地锁。详细错误恢复与测试证据见 [第四阶段验收报告](docs/STAGE4_VALIDATION.md)。
 
@@ -88,12 +101,14 @@ Avatar 输出为二维说话视频。当前 3D 视角、身体动画和房间场
 | POST /api/takes/retake        | {requestId, baseTakeId, overrides: {emotion}}，只改情绪                                               |
 | GET /api/takes/:id            | 查询已记录的 Take；只更新对应任务                                                                     |
 | GET /api/takes/:id/portrait   | 冻结的参考人像                                                                                        |
-| GET /api/takes/:id/content    | 同源流式视频回放                                                                                      |
+| GET /api/takes/:id/content    | 本地归档优先，否则同源流式代理                                                                        |
 | POST /api/takes/:id/reconcile | 关联已核实的 videoId，或 {confirmedNotAccepted:true} 解除未知锁                                       |
 
 emotion 为 neutral / fear / anger；台词限制 300 字。人像仅接受 Boson 官方示例地址或 PNG/JPEG/WebP data URI（约 2 MB 限制）。未开放任意远程人像 URL。
 
 所有接口返回 no-store。错误返回 {error: {code, message}}，不会把上游原始错误或密钥反射给浏览器。付费创建请求不自动重试；网络超时或无法确认提交结果时显示 SUBMISSION_UNKNOWN 并禁用当前页面重复提交。Stage 4 已保存跨重启幂等映射和 Take 历史；服务重启不会重新创建付费任务。
+
+新增接口：POST /api/takes/:id/archive（同源空 JSON，保存已完成视频，最大 50 MB）；GET /api/metrics（当前进程的脱敏计时，不含台词、ID 或凭证）。BOSON_DATA_DIR 可修改运行时数据目录，默认 .data。
 
 ## 测试
 
@@ -102,6 +117,8 @@ npm run typecheck
 npm run test:unit
 npx playwright install chromium
 npm run test:e2e
+# 三浏览器演示要求已安装 Chrome / Edge：
+npm run test:demo
 npm run build
 ```
 

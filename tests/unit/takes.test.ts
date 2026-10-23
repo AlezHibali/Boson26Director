@@ -27,13 +27,11 @@ function fixture(file = ":memory:") {
     video: vi
       .fn()
       .mockResolvedValue({ id: "video_1", status: "completed", progress: 100 }),
-    content: vi
-      .fn()
-      .mockResolvedValue(
-        new Response(new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]), {
-          headers: { "content-type": "video/mp4", "accept-ranges": "bytes" },
-        }),
-      ),
+    content: vi.fn().mockResolvedValue(
+      new Response(new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]), {
+        headers: { "content-type": "video/mp4", "accept-ranges": "bytes" },
+      }),
+    ),
   };
   const service = new TakeService(file, provider);
   services.push(service);
@@ -388,4 +386,17 @@ it("invalid Range and cross-origin recovery never reach provider content or muta
     (await reconcileRoute(req({ confirmedNotAccepted: true }), ctx(t.id)))
       .status,
   ).toBe(200);
+});
+
+it("completedAt and avatar total latency are captured once, never fabricated for historic records", async () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-10-23T20:00:00Z"));
+  const { service, provider } = fixture();
+  const t = await service.create(payload());
+  expect(t.completedAt).toBeUndefined();
+  await vi.advanceTimersByTimeAsync(2000);
+  const completed = await service.refresh(t.id);
+  expect(completed.completedAt).toBe("2026-10-23T20:00:02.000Z");
+  expect((await service.refresh(t.id)).completedAt).toBe(completed.completedAt);
+  expect(provider.video).toHaveBeenCalledOnce();
 });

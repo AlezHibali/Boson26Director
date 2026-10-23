@@ -1,0 +1,72 @@
+{
+  "startedAt": "2026-10-23T21:24:18.441Z",
+  "finishedAt": "2026-10-23T21:26:10.607Z",
+  "revision": "9612a7a6dba5a9da21bd1e43ac72c698b0db2ca3",
+  "dirty": true,
+  "environment": {
+    "node": "24.15.0",
+    "os": "win32",
+    "release": "10.0.26200",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "next": "16.4.3"
+  },
+  "mode": "Local production build, isolated test DB and empty provider key. HTTP/WS fixtures; no paid calls.",
+  "results": [
+    {
+      "phase": "typecheck",
+      "ok": true,
+      "durationMs": 1975
+    },
+    {
+      "phase": "test:unit",
+      "ok": true,
+      "durationMs": 2909
+    },
+    {
+      "phase": "build",
+      "ok": true,
+      "durationMs": 5529
+    },
+    {
+      "phase": "check:secrets",
+      "ok": true,
+      "durationMs": 434
+    },
+    {
+      "phase": "test:e2e",
+      "ok": true,
+      "durationMs": 79392,
+      "browserStats": {
+        "startTime": "2026-10-23T21:24:29.840Z",
+        "duration": 78861.417,
+        "expected": 23,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "phase": "test:demo",
+      "ok": true,
+      "durationMs": 21856,
+      "browserStats": {
+        "startTime": "2026-10-23T21:25:49.275Z",
+        "duration": 21292.699,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "browserCounts": {
+    "startTime": "2026-10-23T21:25:49.275Z",
+    "duration": 21292.699,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "physicalMicrophone": "pending human acceptance",
+  "publicDeployment": "not performed"
+}

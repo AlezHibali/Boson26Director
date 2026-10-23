@@ -1,3 +1,5 @@
+import { storeArchive, archivedContent, type ArchiveInfo } from "./archive";
+import { recordMetric } from "./metrics";
 import { DatabaseSync } from "node:sqlite";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -25,11 +27,19 @@ type Row = { record: string; fingerprint: string };
 export class TakeService {
   readonly db: DatabaseSync;
   private polls = new Map<string, Promise<Take>>();
+  private archives = new Map<string, Promise<Take>>();
+  private archiveDir: string | undefined;
   private nextPoll = new Map<string, number>();
   constructor(
     filename: string,
     private provider: Provider,
+    archiveDir?: string,
   ) {
+    this.archiveDir =
+      archiveDir ||
+      (filename === ":memory:"
+        ? undefined
+        : path.join(path.dirname(filename), "media"));
     this.db = new DatabaseSync(filename);
     this.db.exec(`
       PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
@@ -64,6 +74,14 @@ export class TakeService {
     return JSON.parse(row.record);
   }
   private save(t: Take) {
+    if (t.status === "completed" && this.get(t.id).status !== "completed") {
+      t = { ...t, completedAt: new Date().toISOString() };
+      recordMetric({
+        operation: "avatar_total",
+        durationMs: Date.now() - Date.parse(t.createdAt),
+        outcome: "ok",
+      });
+    }
     const active = [
       "submitting",
       "queued",
@@ -372,17 +390,49 @@ export class TakeService {
         "用户已在 Boson 核实该提交未被接收；解除本地生成锁。此操作未取消任何云端任务。",
     });
   }
+  async importArchive(
+    id: string,
+    stream: ReadableStream<Uint8Array>,
+    source: ArchiveInfo["source"],
+  ) {
+    const t = this.get(id);
+    if (t.status !== "completed" || !this.archiveDir)
+      throw new ApiError("NOT_READY", "任务未完成或本地归档目录不可用。", 409);
+    const archive = await storeArchive(this.archiveDir, id, stream, source);
+    return this.save({ ...this.get(id), archive });
+  }
+  archive(id: string): Promise<Take> {
+    const existing = this.archives.get(id);
+    if (existing) return existing;
+    const t = this.get(id);
+    if (t.status !== "completed" || !t.videoId)
+      throw new ApiError("NOT_READY", "完成后才能归档。", 409);
+    const p = this.provider
+      .content(t.videoId)
+      .then((r) => {
+        if (!r.body) throw new ApiError("INVALID_MEDIA", "视频内容为空。");
+        return this.importArchive(id, r.body, "provider");
+      })
+      .finally(() => this.archives.delete(id));
+    this.archives.set(id, p);
+    return p;
+  }
   async content(id: string, range?: string) {
     const t = this.get(id);
     if (t.status !== "completed" || !t.videoId)
       throw new ApiError("NOT_READY", "此 Take 尚无可播放视频。", 409);
+    if (t.archive && this.archiveDir)
+      return archivedContent(this.archiveDir, id, t.archive, range);
     return this.provider.content(t.videoId, range);
   }
 }
 const globalService = globalThis as unknown as { directorTakes?: TakeService };
 export function takes() {
   if (!globalService.directorTakes) {
-    const dir = path.resolve(process.cwd(), ".data");
+    const dir = path.resolve(
+      /* turbopackIgnore: true */ process.cwd(),
+      process.env.BOSON_DATA_DIR || ".data",
+    );
     mkdirSync(dir, { recursive: true });
     globalService.directorTakes = new TakeService(
       path.join(dir, "takes.sqlite"),

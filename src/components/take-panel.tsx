@@ -9,7 +9,9 @@ export default function TakePanel({
   takes,
   controller,
   videoRef,
+  demoStartedAt,
 }: {
+  demoStartedAt?: string | null;
   takes: TakeController;
   controller: SceneController;
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -19,6 +21,7 @@ export default function TakePanel({
   const [videoError, setVideoError] = useState("");
   const [confirmedId, setConfirmedId] = useState("");
   const [restoreMessage, setRestoreMessage] = useState("");
+  const [archiving, setArchiving] = useState(false);
   const [notAccepted, setNotAccepted] = useState(false);
   const selected = state.takes.find((t) => t.id === state.selectedId);
   const busy =
@@ -118,6 +121,11 @@ export default function TakePanel({
               {t.input.emotion}
             </strong>
             <span>
+              {demoStartedAt && t.createdAt < demoStartedAt
+                ? "预生成 / 历史回放 · "
+                : demoStartedAt
+                  ? "本次演示生成 · "
+                  : ""}
               {t.status}
               {t.progress !== null ? " · " + t.progress + "%" : ""}
             </span>
@@ -127,6 +135,7 @@ export default function TakePanel({
               {new Date(t.createdAt).toLocaleString()}
             </small>
             <span>{t.input.scene.performance.dialogue}</span>
+            {t.archive && <small>本地归档 · 可离线回放</small>}
             <small>
               {t.id}
               {t.baseTakeId ? " · Retake" : ""}
@@ -139,7 +148,12 @@ export default function TakePanel({
           <h3>
             已选 Take · {selected.input.emotion} / {selected.status}
           </h3>
-          <p>选择只切换回放，不改动当前片场。</p>
+          <p>
+            选择只切换回放，不改动当前片场。
+            {demoStartedAt && selected.createdAt < demoStartedAt
+              ? " 当前为预生成的历史 Take。"
+              : ""}
+          </p>
           <div className="take-media">
             {/* Local owned actor reference, never a remote arbitrary URL. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,6 +232,34 @@ export default function TakePanel({
             </div>
           )}
           <div className="take-actions">
+            {selected.status === "completed" && (
+              <button
+                className="secondary"
+                disabled={archiving}
+                onClick={async () => {
+                  setArchiving(true);
+                  try {
+                    await takes.archive(selected.id);
+                    if (
+                      takes.store
+                        .getState()
+                        .takes.find((t) => t.id === selected.id)?.archive
+                    ) {
+                      setVideoError("");
+                      videoRef.current?.load();
+                    }
+                  } finally {
+                    setArchiving(false);
+                  }
+                }}
+              >
+                {archiving
+                  ? "正在归档…"
+                  : selected.archive
+                    ? "重新保存本地回放"
+                    : "保存本地回放"}
+              </button>
+            )}
             <select
               aria-label="Retake 情绪"
               value={emotion}
@@ -262,6 +304,7 @@ export default function TakePanel({
                 {
                   input: selected.input,
                   inputHash: selected.inputHash,
+                  archive: selected.archive,
                   invariantHash: selected.invariantHash,
                 },
                 null,

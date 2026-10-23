@@ -7,6 +7,9 @@ import { catalog, type Command, type SceneState } from "@/domain/scene";
 import { createAssetLibrary } from "@/studio/assets";
 import { createSceneController } from "@/studio/controller";
 import VoiceDirector from "./voice-director";
+import type { VoiceSession } from "@/voice/session";
+import { demoScene } from "@/domain/demo";
+import { commandsToRestore } from "@/studio/restore";
 import TakePanel from "./take-panel";
 import { createTakeController } from "@/studio/take-controller";
 import { capturePortrait } from "@/studio/portrait";
@@ -59,6 +62,16 @@ const cameraPresets: Record<string, SceneState["camera"]> = {
 };
 export default function Studio() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const voiceRef = useRef<VoiceSession | null>(null);
+  const onVoiceSession = useCallback((session: VoiceSession | null) => {
+    voiceRef.current = session;
+  }, []);
+  const demoBusy = useRef(false);
+  const [demoStartedAt, setDemoStartedAt] = useState<string | null>(null);
+  const [demoPreparing, setDemoPreparing] = useState(false);
+  const [demoMessage, setDemoMessage] = useState(
+    "准备演示会停止麦克风与本地播放，恢复预设；历史和云端任务会保留。",
+  );
   const [{ library, controller, takes }] = useState(() => {
     const library = createAssetLibrary();
     const controller = createSceneController((asset) => library.load(asset));
@@ -88,6 +101,28 @@ export default function Studio() {
     void controller.initialize();
     return () => controller.dispose();
   }, [controller]);
+  async function prepareDemo() {
+    if (demoBusy.current) return;
+    demoBusy.current = true;
+    setDemoPreparing(true);
+    voiceRef.current?.stop();
+    takes.stopPlayback();
+    try {
+      const result = await controller.dispatch(
+        commandsToRestore(demoScene()),
+        controller.store.getState().scene.revision,
+      );
+      if (result.ok) {
+        setDemoStartedAt(new Date().toISOString());
+        setDemoMessage(
+          "演示预设就绪。历史 Take 已标记为预生成回放；点击 Action 或连接语音才会使用云端服务。",
+        );
+      } else setDemoMessage(result.message);
+    } finally {
+      demoBusy.current = false;
+      setDemoPreparing(false);
+    }
+  }
   function runJson() {
     try {
       const value: unknown = JSON.parse(commandText);
@@ -105,7 +140,7 @@ export default function Studio() {
           <span className="brand-sub"> / STUDIO</span>
         </Link>
         <span className="studio-mode">
-          STAGE 04 <b>PERFORMANCE & TAKES</b>
+          STAGE 05 <b>DEMO READY</b>
         </span>
         <nav>
           <Link href="/lab">能力验证 / Lab ↗</Link>
@@ -128,6 +163,33 @@ export default function Studio() {
           INTERROGATION ROOM <small>01 ACTOR / 01 SET</small>
         </div>
       </div>
+      <section className="studio-demo studio-card" aria-label="演示准备">
+        <div>
+          <strong>2–3 分钟演示</strong>
+          <p data-testid="demo-status">{demoMessage}</p>
+        </div>
+        <button
+          data-testid="prepare-demo"
+          disabled={demoPreparing}
+          onClick={() => void prepareDemo()}
+        >
+          {demoPreparing ? "正在准备…" : "准备演示"}
+        </button>
+        <details>
+          <summary>演示步骤</summary>
+          <ol>
+            <li>准备片场，再用语音或按钮调整外形、服装、动作与镜头。</li>
+            <li>
+              Action 生成恐惧版本；等待时可切回有“预生成”标识的历史 Take。
+            </li>
+            <li>选择来源 Take，只改为愤怒 Retake；对照回放，最后 Cut。</li>
+          </ol>
+          <p>
+            三维机位和灯光属于预演；生成接收固定正面人像、台词与情绪。每次
+            Action / Retake 会产生调用费用。
+          </p>
+        </details>
+      </section>
       <div className="studio-layout">
         <aside className="studio-card studio-actor-panel">
           <div className="section-title">
@@ -340,7 +402,11 @@ export default function Studio() {
           </details>
         </aside>
         <section className="studio-center">
-          <VoiceDirector controller={controller} takes={takes} />
+          <VoiceDirector
+            controller={controller}
+            takes={takes}
+            onSession={onVoiceSession}
+          />
           <div className="studio-viewport-card">
             <div className="studio-view-toolbar">
               <span>
@@ -458,6 +524,7 @@ export default function Studio() {
             takes={takes}
             controller={controller}
             videoRef={videoRef}
+            demoStartedAt={demoStartedAt}
           />
           <details className="studio-diagnostics">
             <summary>开发诊断 · 场景状态、渲染状态与命令</summary>

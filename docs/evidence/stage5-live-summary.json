@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-23T21:26:59.269Z",
+  "mode": "REAL BOSON / installed Chrome and Edge / cached synthetic microphone",
+  "avatarSubmissions": 0,
+  "physicalMicrophone": "pending human acceptance",
+  "subjectiveEmotion": "pending human listening",
+  "browsers": [
+    {
+      "channel": "chrome",
+      "version": "155.0.8059.86",
+      "roundTripFromConnectMs": 7196,
+      "successfulToolOutputs": 2,
+      "rotationY": 90,
+      "animation": "Idle",
+      "videoWidths": [
+        640,
+        640
+      ],
+      "microphoneTracksEnded": true,
+      "preGeneratedLabel": true,
+      "stageUnchangedDuringPlayback": true,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "masterKeySeen": false,
+      "avatarSubmissions": 0
+    },
+    {
+      "channel": "msedge",
+      "version": "155.0.4283.62",
+      "roundTripFromConnectMs": 7262,
+      "successfulToolOutputs": 2,
+      "rotationY": 90,
+      "animation": "Idle",
+      "videoWidths": [
+        640,
+        640
+      ],
+      "microphoneTracksEnded": true,
+      "preGeneratedLabel": true,
+      "stageUnchangedDuringPlayback": true,
+      "consoleErrors": 0,
+      "pageErrors": 0,
+      "masterKeySeen": false,
+      "avatarSubmissions": 0
+    }
+  ],
+  "tts": {
+    "date": "2026-10-23T21:09:55.977Z",
+    "headersMs": 845,
+    "bodyCompletedMs": 847,
+    "bytes": 7052,
+    "reused": true
+  },
+  "metrics": {
+    "scope": "Current server process; last 128 observations only. No percentile or reliability claim.",
+    "samples": [
+      {
+        "operation": "realtime_session",
+        "durationMs": 252,
+        "outcome": "ok",
+        "at": "2026-10-23T21:27:00.712Z"
+      },
+      {
+        "operation": "realtime_session",
+        "durationMs": 172,
+        "outcome": "ok",
+        "at": "2026-10-23T21:27:13.358Z"
+      }
+    ],
+    "summary": [
+      {
+        "operation": "realtime_session",
+        "count": 2,
+        "errors": 0,
+        "durationsMs": [
+          252,
+          172
+        ]
+      },
+      {
+        "operation": "tts_headers",
+        "count": 0,
+        "errors": 0,
+        "durationsMs": []
+      },
+      {
+        "operation": "avatar_submit",
+        "count": 0,
+        "errors": 0,
+        "durationsMs": []
+      },
+      {
+        "operation": "avatar_poll",
+        "count": 0,
+        "errors": 0,
+        "durationsMs": []
+      },
+      {
+        "operation": "avatar_content_headers",
+        "count": 0,
+        "errors": 0,
+        "durationsMs": []
+      },
+      {
+        "operation": "avatar_total",
+        "count": 0,
+        "errors": 0,
+        "durationsMs": []
+      }
+    ]
+  },
+  "avatarTotalSampleNote": "No new Avatar was submitted. Historic Stage 4 jobs predate completedAt instrumentation; no total duration is inferred."
+}

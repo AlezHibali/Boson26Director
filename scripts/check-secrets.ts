@@ -4,10 +4,6 @@ try {
   process.loadEnvFile(".env.local");
 } catch {}
 const key = process.env.BOSON_API_KEY;
-if (!key)
-  throw new Error(
-    "Local key not configured; cannot check exact secret exclusion.",
-  );
 execFileSync("git", ["check-ignore", "-q", ".env.local"]);
 const listed = execFileSync(
   "git",
@@ -16,26 +12,36 @@ const listed = execFileSync(
 )
   .split("\0")
   .filter(Boolean);
-const paths = [...listed];
+if (
+  listed.some((p) => /^\.env(?!\.example$)/.test(p) || p.startsWith(".data/"))
+)
+  throw Error("Private configuration or data is tracked.");
+const paths = [...new Set(listed)];
 async function walk(dir: string) {
   for (const item of await readdir(dir, { withFileTypes: true })) {
-    const path = dir + "/" + item.name;
-    if (item.isDirectory()) await walk(path);
-    else paths.push(path);
+    const p = dir + "/" + item.name;
+    if (item.isDirectory()) await walk(p);
+    else paths.push(p);
   }
 }
 await walk(".next/static");
 const bad: string[] = [];
-for (const path of paths) {
-  if ((await readFile(path)).includes(Buffer.from(key))) bad.push(path);
+for (const p of paths) {
+  const value = await readFile(p);
+  if (
+    (key && value.includes(Buffer.from(key))) ||
+    /\bbai-(?!eph-)[A-Za-z0-9_-]{40,}\b/.test(value.toString("utf8"))
+  )
+    bad.push(p);
 }
 if (bad.length)
-  throw new Error(
-    "Configured secret found in non-ignored files or browser output: " +
-      bad.join(", "),
+  throw Error(
+    "Potential provider credential found in files: " + bad.join(", "),
   );
 console.log(
-  "PASS: .env.local is Git-ignored; configured master key absent from " +
+  "PASS: private files ignored; " +
+    (key ? "exact configured key and " : "") +
+    "provider-key patterns absent from " +
     paths.length +
-    " non-ignored files and browser build artifacts.",
+    " source and browser artifact files.",
 );

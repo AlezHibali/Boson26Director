@@ -1,10 +1,10 @@
 # AI Director Studio
 
-Stage 2 · 手动 3D 导演台与 Boson 能力验证工作台。
+Stage 3 · 实时语音导演与可编辑 3D 片场。
 
-首页已实现固定审讯室、演员替换、外形/服装/动作、镜头灯光和统一 SceneStore。第一阶段的角色人像、Realtime、TTS 与 Avatar 验证保留在 /lab；语音导演工具与 Take/Retake 按后续阶段实施。
+首页支持中英文语音导演，并保留角色、外形、服装、动作、摄影机和灯光的手动控件。语音与按钮共用 SceneController / SceneStore；工具去重、原子复合操作、打断和断线恢复均已接入。第一阶段的 Realtime/TTS/Avatar 诊断保留在 /lab，Take/Retake 按下一阶段实施。
 
-![Director Desk](docs/evidence/stage2-studio.png)
+![Voice Director](docs/evidence/stage3-live-browser.png)
 
 ## 本地启动
 
@@ -23,6 +23,18 @@ npm run dev
 打开 http://127.0.0.1:3000。服务仅绑定本机地址。当前为本地单用户导演台与诊断工具；公开部署需要后续增加身份、任务归属、额度和持久任务管理。
 
 主密钥只由服务端读取。页面拿到的临时凭证只用于 Realtime 连接；不写入 localStorage、不显示在日志里。修改本地配置后重启服务。
+
+## 语音导演的使用顺序
+
+1. 点击“连接语音导演”，允许麦克风，等到显示“已连接”后说话。
+2. 例如：“换成 Ren，穿黑色西装，右转 45 度并挥手。”或“Move the camera a little closer.”
+3. 查看识别内容与执行记录；不支持的服装/动作会解释原因，复合请求中任何一项失败都不改变场景。
+4. 可以中途说下一条指令打断回复；按钮操作也会同步到语音上下文。
+5. 点击“停止语音”释放麦克风与回复音频。已执行的场景修改保留，尚未提交的语音资产操作取消。
+
+连接中会调用真实 Boson Realtime 和 STT 转写。录音、识别内容和临时凭证仅用于当前会话。网络恢复时申请新临时凭证、注入最新状态，不重放旧指令；连续连接失败最多重试两次。
+
+详见 [第三阶段验收报告](docs/STAGE3_VALIDATION.md)。
 
 ## 手动导演台的使用顺序
 

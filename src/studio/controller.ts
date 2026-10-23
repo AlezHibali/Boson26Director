@@ -57,7 +57,15 @@ export function createSceneController(
   async function dispatch(
     input: unknown,
     expectedRevision?: number,
+    signal?: AbortSignal,
   ): Promise<CommandResult> {
+    if (signal?.aborted)
+      return {
+        ok: false,
+        revision: store.getState().scene.revision,
+        code: "CANCELLED",
+        message: "旧连接的工具调用已取消。",
+      };
     if (disposed)
       return {
         ok: false,
@@ -81,6 +89,7 @@ export function createSceneController(
       (c) => c.type === "select_actor" || c.type === "reset_scene",
     );
     if (selections.length) {
+      const previousLoad = store.getState().load;
       const ticket = ++sequence;
       retryInput = input;
       const ids = [
@@ -97,8 +106,33 @@ export function createSceneController(
           sequence: ticket,
         },
       });
+      let onAbort: (() => void) | undefined;
+      const aborted = new Promise<never>((_, reject) => {
+        onAbort = () => {
+          if (!disposed && ticket === sequence) {
+            sequence++;
+            store.setState({
+              load: {
+                ...previousLoad,
+                status:
+                  previousLoad.status === "loading"
+                    ? "idle"
+                    : previousLoad.status,
+                target: store.getState().scene.actor.presetId,
+                sequence,
+              },
+            });
+          }
+          reject(new DOMException("Aborted", "AbortError"));
+        };
+        signal?.addEventListener("abort", onAbort, { once: true });
+        if (signal?.aborted) onAbort();
+      });
       try {
-        await Promise.all(ids.map((id) => loadAsset(assets[id])));
+        await Promise.race([
+          Promise.all(ids.map((id) => loadAsset(assets[id]))),
+          aborted,
+        ]);
         if (disposed || ticket !== sequence)
           return {
             ok: false,
@@ -125,6 +159,13 @@ export function createSceneController(
         record(next.result, next.state);
         return next.result;
       } catch {
+        if (signal?.aborted)
+          return {
+            ok: false,
+            revision: store.getState().scene.revision,
+            code: "CANCELLED",
+            message: "旧连接的工具调用已取消。",
+          };
         if (disposed || ticket !== sequence)
           return {
             ok: false,
@@ -148,6 +189,8 @@ export function createSceneController(
         });
         record(result);
         return result;
+      } finally {
+        if (onAbort) signal?.removeEventListener("abort", onAbort);
       }
     }
     record(initial.result, initial.state);

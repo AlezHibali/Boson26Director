@@ -16,7 +16,13 @@
     "test:api": "vitest run tests/unit/boson.test.ts tests/unit/origin.test.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
     "test:stage2": "vitest run tests/unit/scene.test.ts tests/unit/stage-assets.test.ts",
-    "test:stage2:e2e": "playwright test studio.spec.ts"
+    "test:stage2:e2e": "playwright test studio.spec.ts",
+    "test:stage3:browser": "tsx scripts/stage3-browser.ts",
+    "test:stage3:e2e": "playwright test voice.spec.ts",
+    "test:stage3:live": "tsx scripts/stage3-corpus.ts",
+    "test:stage3:report": "tsx scripts/stage3-report.ts",
+    "test:stage3:barge": "tsx scripts/stage3-barge.ts",
+    "test:stage3": "vitest run tests/unit/voice-tools.test.ts tests/unit/voice-session.test.ts"
   },
   "dependencies": {
     "@react-three/fiber": "9.8.2",

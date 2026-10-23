@@ -1,3 +1,7 @@
+const evidence =
+  process.env.UPDATE_EVIDENCE === "1"
+    ? "docs/evidence"
+    : "test-results/evidence";
 import { test, expect } from "@playwright/test";
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 test("local HTTP diagnostics and invalid inputs do not invoke paid services", async ({
@@ -43,9 +47,9 @@ test("actual WebGL assets, morph pixels, outfit, animation and portrait capture"
   await expect(
     page.getByRole("button", { name: "截取角色人像" }),
   ).toBeEnabled();
-  mkdirSync("docs/evidence", { recursive: true });
+  mkdirSync(evidence, { recursive: true });
   await page.screenshot({
-    path: "docs/evidence/stage1-lab.png",
+    path: evidence + "/stage1-lab.png",
     fullPage: true,
   });
   const stage = page.getByTestId("actor-stage");
@@ -62,13 +66,13 @@ test("actual WebGL assets, morph pixels, outfit, animation and portrait capture"
   expect(after).not.toBe(before);
   expect(await stage.screenshot()).not.toEqual(first);
   writeFileSync(
-    "docs/evidence/actor-portrait.png",
+    evidence + "/actor-portrait.png",
     Buffer.from(before!.split(",")[1], "base64"),
   );
   await page.getByLabel("服装", { exact: true }).selectOption("Suit");
   await page.getByLabel("动作", { exact: true }).selectOption("Wave");
   await page.screenshot({
-    path: "docs/evidence/stage1-morph-and-suit.png",
+    path: evidence + "/stage1-morph-and-suit.png",
     fullPage: true,
   });
   await page.getByRole("button", { name: /Ren/ }).click();

@@ -1,3 +1,7 @@
+const evidence =
+  process.env.UPDATE_EVIDENCE === "1"
+    ? "docs/evidence"
+    : "test-results/evidence";
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { cpus, platform, release } from "node:os";
@@ -31,9 +35,9 @@ test("B5: complete manual director path changes actual actor, camera and lights"
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await ready(page);
-  mkdirSync("docs/evidence", { recursive: true });
+  mkdirSync(evidence, { recursive: true });
   await page.screenshot({
-    path: "docs/evidence/stage2-studio.png",
+    path: evidence + "/stage2-studio.png",
     fullPage: true,
   });
   const initial = await state(page);
@@ -80,7 +84,7 @@ test("B5: complete manual director path changes actual actor, camera and lights"
     .poll(async () => (await rendered(page)).loadedPreset)
     .toBe("ren");
   await page.screenshot({
-    path: "docs/evidence/stage2-directed.png",
+    path: evidence + "/stage2-directed.png",
     fullPage: true,
   });
   // Fix actor pose for a clear before/after geometry comparison.
@@ -89,12 +93,12 @@ test("B5: complete manual director path changes actual actor, camera and lights"
   await expect.poll(async () => (await rendered(page)).morphs.EyeSize).toBe(0);
   const before = await page
     .getByTestId("stage-viewport")
-    .screenshot({ path: "docs/evidence/stage2-morph-before.png" });
+    .screenshot({ path: evidence + "/stage2-morph-before.png" });
   await page.getByLabel("眼睛大小", { exact: true }).fill("1");
   await expect.poll(async () => (await rendered(page)).morphs.EyeSize).toBe(1);
   const after = await page
     .getByTestId("stage-viewport")
-    .screenshot({ path: "docs/evidence/stage2-morph-after.png" });
+    .screenshot({ path: evidence + "/stage2-morph-after.png" });
   expect(after).not.toEqual(before);
   expect(errors).toEqual([]);
 });
@@ -247,13 +251,13 @@ test("B8: 1280x720 and 1920x1080 layout and measured renderer performance", asyn
       drawCalls: info.drawCalls,
       actors: info.actors,
     });
-    mkdirSync("docs/evidence", { recursive: true });
+    mkdirSync(evidence, { recursive: true });
     writeFileSync(
-      "docs/evidence/stage2-performance.json",
+      evidence + "/stage2-performance.json",
       JSON.stringify(report, null, 2),
     );
     await page.screenshot({
-      path: "docs/evidence/stage2-" + size.width + ".png",
+      path: evidence + "/stage2-" + size.width + ".png",
       fullPage: true,
     });
     expect(info.actors).toBe(1);

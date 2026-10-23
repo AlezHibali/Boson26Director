@@ -6,6 +6,7 @@ import { useStore } from "zustand";
 import { catalog, type Command, type SceneState } from "@/domain/scene";
 import { createAssetLibrary } from "@/studio/assets";
 import { createSceneController } from "@/studio/controller";
+import VoiceDirector from "./voice-director";
 import type { RenderInfo } from "@/studio/stage-view";
 import "@/app/studio.css";
 const StageView = dynamic(() => import("@/studio/stage-view"), {
@@ -97,7 +98,7 @@ export default function Studio() {
           <span className="brand-sub"> / STUDIO</span>
         </Link>
         <span className="studio-mode">
-          STAGE 02 <b>MANUAL DIRECTION</b>
+          STAGE 03 <b>VOICE DIRECTION</b>
         </span>
         <nav>
           <Link href="/lab">能力验证 / Lab ↗</Link>
@@ -112,7 +113,7 @@ export default function Studio() {
       <div className="studio-heading">
         <div>
           <p className="eyebrow">ONE ROOM. EVERY DECISION IS YOURS.</p>
-          <h1>你的片场，准备就绪。</h1>
+          <h1>说出你的镜头。</h1>
           <p>从演员到最后一道光，把脑海里的镜头摆出来。</p>
         </div>
         <div className="studio-project">
@@ -332,6 +333,7 @@ export default function Studio() {
           </details>
         </aside>
         <section className="studio-center">
+          <VoiceDirector controller={controller} />
           <div className="studio-viewport-card">
             <div className="studio-view-toolbar">
               <span>
@@ -677,7 +679,7 @@ export default function Studio() {
         <span>SCENE 01 / THE INTERVIEW</span>
         <span>角色、镜头、灯光与表演参数均可独立调整</span>
         <span>
-          MANUAL STAGING · {scene.revision.toString().padStart(3, "0")}
+          VOICE & MANUAL STAGING · {scene.revision.toString().padStart(3, "0")}
         </span>
       </footer>
     </main>

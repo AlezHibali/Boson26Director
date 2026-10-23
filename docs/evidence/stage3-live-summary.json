@@ -1,0 +1,446 @@
+{
+  "date": "2026-10-23T20:07:12.506Z",
+  "mode": "Real Boson services with generated test speech; not a human microphone acceptance.",
+  "corpus": {
+    "passed": 10,
+    "total": 10,
+    "cases": [
+      {
+        "id": "01-actor-en",
+        "utterance": "Replace the actor with Ren. Keep everything else unchanged.",
+        "heard": "Replace the actor with Wren. Keep everything else unchanged.",
+        "ok": true,
+        "elapsedMs": 6995,
+        "tools": [
+          {
+            "name": "select_actor",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "ren",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "02-outfit-zh",
+        "utterance": "把演员的衣服换成黑色西装。",
+        "heard": "把演员的衣服换成黑色西装。",
+        "ok": true,
+        "elapsedMs": 4961,
+        "tools": [
+          {
+            "name": "set_outfit",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Suit",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "03-turn-wave-en",
+        "utterance": "Turn the actor right forty-five degrees and wave.",
+        "heard": "Turn the actor right 45 degrees and wave.",
+        "ok": true,
+        "elapsedMs": 6095,
+        "tools": [
+          {
+            "name": "batch_commands",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 45,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "04-dolly-zh",
+        "utterance": "镜头靠近一点。",
+        "heard": "镜头靠近一点。",
+        "ok": true,
+        "elapsedMs": 3463,
+        "tools": [
+          {
+            "name": "dolly",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 4.8,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "05-orbit-en",
+        "utterance": "Orbit the camera fifteen degrees to the right.",
+        "heard": "Orbit the camera 15 degrees to the right.",
+        "ok": true,
+        "elapsedMs": 5042,
+        "tools": [
+          {
+            "name": "orbit",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 15,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "06-eyes-zh",
+        "utterance": "把演员的眼睛大小设置为零点八。",
+        "heard": "把演员的眼睛大小设置为零点八。",
+        "ok": true,
+        "elapsedMs": 6396,
+        "tools": [
+          {
+            "name": "set_appearance",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.8,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "07-face-en",
+        "utterance": "Set the actor's face width to zero point six.",
+        "heard": "Set the actor's face width to 0.6.",
+        "ok": true,
+        "elapsedMs": 5994,
+        "tools": [
+          {
+            "name": "set_appearance",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.6
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "08-lights-zh",
+        "utterance": "主光亮度设为二，补光亮度设为零点五，其他不变。",
+        "heard": "注：光亮度设为二，补光亮度设为零点五，其他不变。",
+        "ok": true,
+        "elapsedMs": 8798,
+        "tools": [
+          {
+            "name": "set_lighting",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 2,
+            "fill": 0.5,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      },
+      {
+        "id": "09-script-en",
+        "utterance": "Set the actor's line to: We need to talk. Set the emotion to anger.",
+        "heard": "Set the actor's line to \"We need to talk.\" Set the emotion to anger.",
+        "ok": true,
+        "elapsedMs": 8426,
+        "tools": [
+          {
+            "name": "batch_commands",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "mira",
+          "outfit": "Casual",
+          "rotationY": 0,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "We need to talk.",
+            "emotion": "anger"
+          }
+        }
+      },
+      {
+        "id": "10-compound-zh",
+        "utterance": "保持其他内容不变，换成Ren，穿黑色西装，向右转四十五度。",
+        "heard": "保持其他内容不变，换成 Rain 穿黑色西装，向右转 45 度。",
+        "ok": true,
+        "elapsedMs": 11917,
+        "tools": [
+          {
+            "name": "batch_commands",
+            "status": "success"
+          }
+        ],
+        "observed": {
+          "presetId": "ren",
+          "outfit": "Suit",
+          "rotationY": 45,
+          "appearance": {
+            "EyeSize": 0.15,
+            "FaceWidth": 0.1
+          },
+          "camera": {
+            "distance": 5.2,
+            "azimuth": 0,
+            "height": 1.9,
+            "fov": 40,
+            "targetY": 1.2
+          },
+          "lights": {
+            "key": 3.5,
+            "fill": 1.1,
+            "rim": 2.5,
+            "ambient": 0.5,
+            "temperature": "warm"
+          },
+          "performance": {
+            "dialogue": "I didn't do it.",
+            "emotion": "fear"
+          }
+        }
+      }
+    ]
+  },
+  "browser": {
+    "result": "PASS",
+    "heard": "Turn the actor right 45 degrees and wave.",
+    "replyBufferStarts": 99,
+    "tracksReleased": true,
+    "actor": {
+      "id": "actor-1",
+      "presetId": "mira",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -0.45
+      },
+      "rotationY": 45,
+      "appearance": {
+        "EyeSize": 0.15,
+        "FaceWidth": 0.1
+      },
+      "expression": {},
+      "outfit": "Casual",
+      "animation": {
+        "name": "Idle",
+        "token": 2
+      }
+    },
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "barge": {
+    "result": "PASS",
+    "replySourcesStopped": 53,
+    "truncationRequests": 1,
+    "localStopMs": 0.3999999910593033,
+    "providerErrors": [],
+    "actorRotationY": 45,
+    "cameraDistance": 4.8
+  }
+}

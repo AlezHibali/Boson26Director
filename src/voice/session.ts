@@ -1,5 +1,5 @@
-import { directorInstructions, directorTools } from "./tools";
-import { ToolBridge, type ToolLog } from "./tool-bridge";
+import { directorInstructions, directorTools, performanceTools } from "./tools";
+import { ToolBridge, type ToolLog, type EffectHandler } from "./tool-bridge";
 import type { AudioIO } from "./browser-audio";
 import type { Command, CommandResult, SceneState } from "@/domain/scene";
 export type SocketLike = {
@@ -33,6 +33,8 @@ export type VoiceState = {
   pcmPackets: number;
 };
 type Deps = {
+  effect?: EffectHandler;
+  performanceContext?: () => unknown;
   getScene: () => SceneState;
   execute: (command: Command, signal: AbortSignal) => Promise<CommandResult>;
   subscribe: (changed: () => void) => () => void;
@@ -77,6 +79,7 @@ export class VoiceSession {
   private inFlight = false;
   private currentResponse = "";
   private blocked = new Set<string>();
+  private audioResponses = new Set<string>();
   private pendingContinuation = false;
   private continuationRounds = 0;
   private bridge: ToolBridge;
@@ -84,6 +87,7 @@ export class VoiceSession {
     this.bridge = new ToolBridge({
       getScene: deps.getScene,
       execute: deps.execute,
+      effect: deps.effect,
       log: (entry) => {
         const rows = this.state.tools;
         const index = rows.findIndex((row) => row.callId === entry.callId);
@@ -134,6 +138,7 @@ export class VoiceSession {
     this.currentResponse = "";
     this.pendingContinuation = false;
     this.blocked.clear();
+    this.audioResponses.clear();
     this.epoch++;
   }
   async start() {
@@ -220,8 +225,15 @@ export class VoiceSession {
           type: "session.update",
           session: {
             model: "higgs-realtime",
-            instructions: directorInstructions(this.deps.getScene()),
-            tools: directorTools,
+            instructions: directorInstructions(
+              this.deps.getScene(),
+              this.deps.effect
+                ? this.deps.performanceContext?.() || {}
+                : undefined,
+            ),
+            tools: this.deps.effect
+              ? [...directorTools, ...performanceTools]
+              : directorTools,
             tool_choice: "auto",
             output_modalities: ["audio"],
             audio: {
@@ -324,6 +336,11 @@ export class VoiceSession {
           typeof event.item_id === "string"
         ) {
           try {
+            this.audioResponses.add(event.response_id || this.currentResponse);
+            if (this.audioResponses.size > 64)
+              this.audioResponses.delete(
+                this.audioResponses.values().next().value!,
+              );
             this.audio?.play(
               event.delta,
               event.item_id,
@@ -417,7 +434,14 @@ export class VoiceSession {
     if (this.ready && this.desired)
       this.send({
         type: "session.update",
-        session: { instructions: directorInstructions(this.deps.getScene()) },
+        session: {
+          instructions: directorInstructions(
+            this.deps.getScene(),
+            this.deps.effect
+              ? this.deps.performanceContext?.() || {}
+              : undefined,
+          ),
+        },
       });
   }
   private lost(reason: string) {
@@ -460,6 +484,21 @@ export class VoiceSession {
   private fail(message: string) {
     this.stop();
     this.patch({ phase: "error", status: message });
+  }
+  cutPlayback() {
+    for (const id of this.audioResponses) this.blocked.add(id);
+    this.audioResponses.clear();
+    if (this.currentResponse) this.blocked.add(this.currentResponse);
+    const interrupted = this.audio?.interrupt();
+    interrupted?.truncations.forEach((item) =>
+      this.send({ type: "conversation.item.truncate", ...item }),
+    );
+    if (!this.desired) return;
+    this.patch({
+      phase: this.desired ? "listening" : "stopped",
+      status: "已停止本地回复播放；云端生成继续。",
+      interruptionMs: interrupted?.latencyMs ?? null,
+    });
   }
   stop() {
     this.desired = false;

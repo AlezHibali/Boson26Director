@@ -1,12 +1,14 @@
 import { VideoIdSchema } from "@/server/boson";
-import { client, failure, json } from "@/server/http";
+import { failure, json } from "@/server/http";
+import { takes } from "@/server/takes";
+export const runtime = "nodejs";
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
     return json(
-      await client().video(VideoIdSchema.parse((await context.params).id)),
+      await takes().video(VideoIdSchema.parse((await context.params).id)),
     );
   } catch (error) {
     return failure(error);

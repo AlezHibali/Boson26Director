@@ -1,12 +1,15 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useStore } from "zustand";
 import { catalog, type Command, type SceneState } from "@/domain/scene";
 import { createAssetLibrary } from "@/studio/assets";
 import { createSceneController } from "@/studio/controller";
 import VoiceDirector from "./voice-director";
+import TakePanel from "./take-panel";
+import { createTakeController } from "@/studio/take-controller";
+import { capturePortrait } from "@/studio/portrait";
 import type { RenderInfo } from "@/studio/stage-view";
 import "@/app/studio.css";
 const StageView = dynamic(() => import("@/studio/stage-view"), {
@@ -55,12 +58,16 @@ const cameraPresets: Record<string, SceneState["camera"]> = {
   特写: { distance: 2.6, azimuth: 0, height: 1.95, fov: 30, targetY: 1.72 },
 };
 export default function Studio() {
-  const [{ library, controller }] = useState(() => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [{ library, controller, takes }] = useState(() => {
     const library = createAssetLibrary();
-    return {
-      library,
-      controller: createSceneController((asset) => library.load(asset)),
-    };
+    const controller = createSceneController((asset) => library.load(asset));
+    const takes = createTakeController({
+      scene: () => controller.store.getState().scene,
+      capture: (s) => capturePortrait(s, library),
+      stopPlayback: () => videoRef.current?.pause(),
+    });
+    return { library, controller, takes };
   });
   const state = useStore(controller.store);
   const { scene, load, lastResult, log } = state;
@@ -98,7 +105,7 @@ export default function Studio() {
           <span className="brand-sub"> / STUDIO</span>
         </Link>
         <span className="studio-mode">
-          STAGE 03 <b>VOICE DIRECTION</b>
+          STAGE 04 <b>PERFORMANCE & TAKES</b>
         </span>
         <nav>
           <Link href="/lab">能力验证 / Lab ↗</Link>
@@ -333,7 +340,7 @@ export default function Studio() {
           </details>
         </aside>
         <section className="studio-center">
-          <VoiceDirector controller={controller} />
+          <VoiceDirector controller={controller} takes={takes} />
           <div className="studio-viewport-card">
             <div className="studio-view-toolbar">
               <span>
@@ -447,6 +454,11 @@ export default function Studio() {
               </div>
             </div>
           </section>
+          <TakePanel
+            takes={takes}
+            controller={controller}
+            videoRef={videoRef}
+          />
           <details className="studio-diagnostics">
             <summary>开发诊断 · 场景状态、渲染状态与命令</summary>
             <div className="studio-diagnostic-grid">

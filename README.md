@@ -1,14 +1,14 @@
 # AI Director Studio
 
-Stage 3 · 实时语音导演与可编辑 3D 片场。
+Stage 4 · 情绪表演、持久化 Take 历史与非破坏性 Retake。
 
-首页支持中英文语音导演，并保留角色、外形、服装、动作、摄影机和灯光的手动控件。语音与按钮共用 SceneController / SceneStore；工具去重、原子复合操作、打断和断线恢复均已接入。第一阶段的 Realtime/TTS/Avatar 诊断保留在 /lab，Take/Retake 按下一阶段实施。
+首页支持中英文语音导演，并保留角色、外形、服装、动作、摄影机和灯光的手动控件。语音与按钮共用 SceneController / SceneStore；工具去重、原子复合操作、打断和断线恢复均已接入。Action 会冻结当前外形、服装、台词与情绪，生成可播放的 Take；Retake 只修改来源 Take 的情绪。第一阶段的诊断保留在 /lab。
 
-![Voice Director](docs/evidence/stage3-live-browser.png)
+![Take history](docs/evidence/stage4-live-takes.png)
 
 ## 本地启动
 
-要求：Node.js 22.13+（本次使用 24.15.0）、npm、支持 WebGL/AudioWorklet 的浏览器。真实媒体验证脚本额外需要 ffmpeg/ffprobe 在 PATH 中。
+要求：Node.js 24+（本次使用 24.15.0，服务端使用内置 node:sqlite）、npm、支持 WebGL/AudioWorklet 的浏览器。真实媒体验证脚本额外需要 ffmpeg/ffprobe 在 PATH 中。
 
 在 PowerShell 中：
 
@@ -20,9 +20,20 @@ if (!(Test-Path .env.local)) { Copy-Item .env.example .env.local }
 npm run dev
 ```
 
-打开 http://127.0.0.1:3000。服务仅绑定本机地址。当前为本地单用户导演台与诊断工具；公开部署需要后续增加身份、任务归属、额度和持久任务管理。
+打开 http://127.0.0.1:3000。服务仅绑定本机地址。当前为本地单用户导演台与诊断工具；公开部署需要后续增加身份、用户任务归属与额度管理；当前 SQLite 任务记录面向本机单用户、单进程。
 
 主密钥只由服务端读取。页面拿到的临时凭证只用于 Realtime 连接；不写入 localStorage、不显示在日志里。修改本地配置后重启服务。
+
+## 表演与 Take 的使用顺序
+
+1. 准备演员、外形、服装、台词和情绪，点击 Action，或连接语音后说“开始表演，Action”。
+2. 生成使用冻结外形的固定正面人像；舞台机位、灯光、位置和 Wave 属于三维预演，不直接控制 Avatar 画面。
+3. 在 Take 历史选择记录回放。选择不会改动舞台；生成结束也不会自动切换当前选择。
+4. 选择来源 Take，设置 Retake 情绪并点击重拍，或说“保持其他不变，只改成愤怒，再来一次”。
+5. Cut 停止本地视频与助手回复；生成中的云端任务继续运行。恢复来源片场需单独点击“恢复此 Take 的片场”。
+6. 刷新和重启后，从 .data/takes.sqlite 恢复记录与人像。参考图保留在本地，视频由同源接口向供应商取回，不保证永久可用。
+
+同一时间最多一个 Avatar 任务，Lab 也共享限制。未知提交不会自动重试；先检查历史和 Boson，可关联已确认的 video ID，或确认未接收后解除本地锁。详细错误恢复与测试证据见 [第四阶段验收报告](docs/STAGE4_VALIDATION.md)。
 
 ## 语音导演的使用顺序
 
@@ -58,24 +69,31 @@ npm run dev
 3. 点击「连接麦克风」，允许权限后说一句话。听到回复后点击「停止连接」释放设备。本阶段仅验证对话，尚未接入导演工具。
 4. 输入短台词，选择情绪，点击「试听 TTS 3」，再通过音频控件播放。
 5. 首先选择官方示例人像验证 Avatar 协议，再选择当前角色截图验证风格化外观。每次点击会真实创建一个生成任务。
-6. 等待任务完成后播放视频。自动轮询失败/超过等待时间时，用返回的 video_ ID 手动继续查询。刷新仅恢复最近一个 ID，不是完整 Take 历史。
+6. 等待任务完成后播放视频。自动轮询失败/超过等待时间时，用返回的 video_ ID 手动继续查询。Lab 刷新仅恢复最近一个 ID；主页另有完整持久化 Take 历史。Lab 新提交也记录为诊断 Take，标明人像未同步片场。
 
 Avatar 输出为二维说话视频。当前 3D 视角、身体动画和房间场景不作为完整三维视频输入。生成画面中供应商会添加 AI 提示水印。
 
 ## 本地 API
 
-| 方法与路径                  | 作用                                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET /api/diagnostics        | 配置是否存在、模型列表；不调用上游                                                                    |
-| POST /api/realtime/session  | 输入 {}，获取短期凭证                                                                                 |
-| POST /api/voice-preview     | 输入 {text, emotion}，返回 MP3 字节流                                                                 |
-| POST /api/avatar            | 输入 {ref_image, input_tts: {text, emotion}, size}，返回任务对象；也支持白名单/内联音频 input，二选一 |
-| GET /api/avatar/:id         | 查询 queued / in_progress / completed / failed                                                        |
-| GET /api/avatar/:id/content | 完成后代理 video/mp4；支持单段 Range                                                                  |
+| 方法与路径                    | 作用                                                                                                  |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET /api/diagnostics          | 配置是否存在、模型列表；不调用上游                                                                    |
+| POST /api/realtime/session    | 输入 {}，获取短期凭证                                                                                 |
+| POST /api/voice-preview       | 输入 {text, emotion}，返回 MP3 字节流                                                                 |
+| POST /api/avatar              | 输入 {ref_image, input_tts: {text, emotion}, size}，返回任务对象；也支持白名单/内联音频 input，二选一 |
+| GET /api/avatar/:id           | 查询 queued / in_progress / completed / failed                                                        |
+| GET /api/avatar/:id/content   | 完成后代理 video/mp4；转发单段 Range（供应商也可合法返回完整 200）                                    |
+| GET /api/takes                | 恢复完整本地历史                                                                                      |
+| POST /api/takes               | {requestId, scene, portrait}，持久化后提交一次表演                                                    |
+| POST /api/takes/retake        | {requestId, baseTakeId, overrides: {emotion}}，只改情绪                                               |
+| GET /api/takes/:id            | 查询已记录的 Take；只更新对应任务                                                                     |
+| GET /api/takes/:id/portrait   | 冻结的参考人像                                                                                        |
+| GET /api/takes/:id/content    | 同源流式视频回放                                                                                      |
+| POST /api/takes/:id/reconcile | 关联已核实的 videoId，或 {confirmedNotAccepted:true} 解除未知锁                                       |
 
 emotion 为 neutral / fear / anger；台词限制 300 字。人像仅接受 Boson 官方示例地址或 PNG/JPEG/WebP data URI（约 2 MB 限制）。未开放任意远程人像 URL。
 
-所有接口返回 no-store。错误返回 {error: {code, message}}，不会把上游原始错误或密钥反射给浏览器。付费创建请求不自动重试；网络超时或无法确认提交结果时显示 SUBMISSION_UNKNOWN 并禁用当前页面重复提交。跨重启幂等与 Take 持久化属于 Stage 4。
+所有接口返回 no-store。错误返回 {error: {code, message}}，不会把上游原始错误或密钥反射给浏览器。付费创建请求不自动重试；网络超时或无法确认提交结果时显示 SUBMISSION_UNKNOWN 并禁用当前页面重复提交。Stage 4 已保存跨重启幂等映射和 Take 历史；服务重启不会重新创建付费任务。
 
 ## 测试
 
@@ -89,7 +107,16 @@ npm run build
 
 单元测试使用明确的上游 mock，验证请求协议、错误处理、无效输入不发请求、下载字节流、实际 GLB 顶点与骨骼、动画和 PCM 编码。浏览器默认测试使用本地媒体夹具及模拟 WebSocket，不调用付费服务；另有真实 GLB 画面和截图测试。
 
-真实测试会使用 .env.local 的密钥并产生调用费用：
+阶段四真实验收（最多两个 Avatar，有检查点避免重复提交）：
+
+```powershell
+npm run test:stage4
+npm run test:stage4:e2e
+# 保持本地服务运行；首次产生调用费用：
+npm run test:stage4:live
+```
+
+历史第一阶段真实测试也会使用 .env.local 的密钥并产生调用费用：
 
 ```powershell
 # 先执行浏览器测试，产出项目角色参考人像，再执行：
@@ -116,6 +143,6 @@ npm run assets:generate
 
 ## 本阶段验收记录
 
-见 [Stage 1 验收报告](docs/STAGE1_VALIDATION.md)、[五阶段开发方案](DEVELOPMENT_PLAN.md) 与 [原始 handoff](PROJECT_HANDOFF_AI_DIRECTOR_STUDIO.md)。
+见 [Stage 4 验收报告](docs/STAGE4_VALIDATION.md)、[Stage 3 验收报告](docs/STAGE3_VALIDATION.md)、[Stage 2 验收报告](docs/STAGE2_VALIDATION.md)、[Stage 1 验收报告](docs/STAGE1_VALIDATION.md)、[五阶段开发方案](DEVELOPMENT_PLAN.md) 与 [原始 handoff](PROJECT_HANDOFF_AI_DIRECTOR_STUDIO.md)。
 
 协议依据：[Boson Realtime](https://docs.boson.ai/api-reference/realtime/client-events)、[Realtime 服务器事件](https://docs.boson.ai/api-reference/realtime/server-events)、[Avatar 输入](https://docs.boson.ai/models/higgs-avatar/input-options)、[TTS 标签](https://docs.boson.ai/models/higgs-tts/tags)。

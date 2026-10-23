@@ -76,7 +76,9 @@ export function failure(error: unknown) {
       status: known.status,
       headers: {
         ...noStore,
-        ...(known.retryAfter && /^\d{1,5}$/.test(known.retryAfter)
+        ...(known.retryAfter &&
+        (/^\d{1,5}$/.test(known.retryAfter) ||
+          Number.isFinite(Date.parse(known.retryAfter)))
           ? { "Retry-After": known.retryAfter }
           : {}),
       },

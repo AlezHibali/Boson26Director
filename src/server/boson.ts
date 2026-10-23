@@ -147,7 +147,7 @@ export class BosonClient {
           404,
         );
       throw new ApiError(
-        "UPSTREAM_ERROR",
+        status >= 500 ? "UPSTREAM_ERROR" : "UPSTREAM_REJECTED",
         status >= 500
           ? "Boson 服务暂不可用。"
           : "Boson 拒绝了请求，请检查输入或账户权限。",

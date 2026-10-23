@@ -739,3 +739,79 @@
     white-space: nowrap;
   }
 }
+
+/* Stage 4 performance history */
+.studio .take-panel {
+  margin-top: 16px;
+  padding: 20px;
+}
+.studio .take-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.studio .take-explainer,
+.studio .take-panel p,
+.studio .take-panel small {
+  color: var(--muted, #86938e);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.studio .take-history {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+.studio .take-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  background: #17262c;
+  border: 1px solid #34444a;
+  color: #e2e6db;
+  padding: 14px;
+  overflow-wrap: anywhere;
+}
+.studio .take-card.selected {
+  border-color: #c8db9b;
+  background: #263831;
+}
+.studio .take-selected {
+  margin-top: 20px;
+  border-top: 1px solid #34444a;
+  padding-top: 18px;
+}
+.studio .take-media {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.studio .take-media img {
+  border-radius: 8px;
+  object-fit: cover;
+}
+.studio .take-media video {
+  width: min(100%, 360px);
+  max-height: 360px;
+  background: #101c21;
+  border-radius: 8px;
+}
+.studio .take-panel pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow: auto;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .studio .take-media {
+    flex-direction: column;
+  }
+  .studio .take-actions > * {
+    max-width: 100%;
+  }
+}

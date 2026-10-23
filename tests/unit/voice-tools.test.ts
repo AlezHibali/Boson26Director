@@ -49,7 +49,7 @@ function fixture(loader = async () => {}) {
   };
 }
 describe("director tool contract", () => {
-  it("declares only implemented tools with parameter schemas and excludes future generation", () => {
+  it("declares scene tools with strict schemas and excludes unbound generation effects", () => {
     expect(directorTools.map((t) => t.name)).toEqual(
       expect.arrayContaining([
         "select_actor",

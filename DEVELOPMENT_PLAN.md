@@ -1,7 +1,7 @@
 # AI Director Studio：五阶段开发与验收方案
 
 > 日期：2026-10-23。依据：仓库内 `PROJECT_HANDOFF_AI_DIRECTOR_STUDIO.md` 与下列官方资料。
-> 当前仓库仅有 handoff，尚无应用代码。本文件是开发方案；接口文档核对不代表真实接口调用成功，也不代表浏览器验收通过。
+> 本方案编写时仓库仅有 handoff。当前已实施 Stage 1–4；实际交付和证据分别见 docs/STAGE1_VALIDATION.md 至 docs/STAGE4_VALIDATION.md。Stage 4 的主观情绪听感仍待人工确认。方案本身不代替运行验收。
 > 以下 `/api/*`、数据结构、阈值和阶段安排均为项目设计，不是 Boson 原生协议。
 
 ## 一、项目理解与交付范围

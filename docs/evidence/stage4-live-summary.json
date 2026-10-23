@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-23T20:54:29.263Z",
+  "mode": "REAL BOSON / REAL CHROMIUM / SYNTHETIC MICROPHONE",
+  "reusedCheckpointAtStart": true,
+  "manualQuality": "pending human listening and identity/lip-sync review",
+  "fear": {
+    "status": "completed",
+    "queryWaitMsThisRun": 7,
+    "queryPollsThisRun": 1,
+    "media": {
+      "bytes": 63315,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 640,
+            "height": 640,
+            "duration": "1.541667"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "duration": "1.578667"
+          }
+        ],
+        "format": {
+          "duration": "1.578667",
+          "size": "63315"
+        }
+      },
+      "rangeStatus": 200,
+      "browserWidth": 640
+    }
+  },
+  "anger": {
+    "status": "completed",
+    "queryWaitMsThisRun": 3,
+    "queryPollsThisRun": 1,
+    "media": {
+      "bytes": 70591,
+      "metadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 640,
+            "height": 640,
+            "duration": "1.541667"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "duration": "1.578667"
+          }
+        ],
+        "format": {
+          "duration": "1.578667",
+          "size": "70591"
+        }
+      },
+      "rangeStatus": 200,
+      "browserWidth": 640
+    }
+  },
+  "voiceAction": {
+    "tool": "perform",
+    "verifiedInitialRun": true,
+    "note": "Initial real voice Action succeeded; first browser run stopped at the overly strict Range-206 assertion."
+  },
+  "totalSavedTakes": 2,
+  "snapshotIsolation": {
+    "invariantHashEqual": true,
+    "sourceUnchanged": true,
+    "retakeCameraDistance": 5.2
+  },
+  "selectionPreserved": true,
+  "refreshRestoresHistory": true,
+  "worksAfterReload": true,
+  "createsThisRun": 0,
+  "browserErrors": []
+}

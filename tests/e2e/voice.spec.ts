@@ -1,6 +1,10 @@
 import { test, expect, type Page, type WebSocketRoute } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import type { SceneState } from "../../src/domain/scene";
+const evidence =
+  process.env.UPDATE_EVIDENCE === "1"
+    ? "docs/evidence"
+    : "test-results/evidence";
 const scene = async (page: Page): Promise<SceneState> =>
   JSON.parse((await page.getByTestId("scene-state").textContent())!);
 async function prepare(page: Page) {
@@ -214,9 +218,9 @@ test("B9/B12: complete speech tool calls update real 3D state, deduplicate, and 
     .toBe(true);
   expect(await scene(page)).toEqual(before);
   await page.locator(".voice-tool-details summary").first().click();
-  mkdirSync("docs/evidence", { recursive: true });
+  mkdirSync(evidence, { recursive: true });
   await page.screenshot({
-    path: "docs/evidence/stage3-voice-director.png",
+    path: evidence + "/stage3-voice-director.png",
     fullPage: true,
   });
   await page.getByRole("button", { name: "停止语音", exact: true }).click();

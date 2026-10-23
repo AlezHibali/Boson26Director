@@ -2,22 +2,35 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { VoiceSession, type SocketLike } from "@/voice/session";
 import { openBrowserAudio } from "@/voice/browser-audio";
+import type { TakeController } from "@/studio/take-controller";
 import type { SceneController } from "@/studio/controller";
 export default function VoiceDirector({
   controller,
+  takes,
 }: {
   controller: SceneController;
+  takes: TakeController;
 }) {
   const [session] = useState(
     () =>
       new VoiceSession({
         getScene: () => controller.store.getState().scene,
+        effect: takes.effect,
+        performanceContext: takes.context,
         execute: (command, signal) =>
           controller.dispatch(command, undefined, signal),
-        subscribe: (changed) =>
-          controller.store.subscribe((state, previous) => {
+        subscribe: (changed) => {
+          const a = controller.store.subscribe((state, previous) => {
             if (state.scene.revision !== previous.scene.revision) changed();
-          }),
+          });
+          const b = takes.store.subscribe((s, p) => {
+            if (s.takes !== p.takes || s.selectedId !== p.selectedId) changed();
+          });
+          return () => {
+            a();
+            b();
+          };
+        },
         mint: async (signal) => {
           const response = await fetch("/api/realtime/session", {
             method: "POST",
@@ -41,6 +54,10 @@ export default function VoiceDirector({
     session.subscribe,
     session.getSnapshot,
     session.getSnapshot,
+  );
+  useEffect(
+    () => takes.bindReplyStop(() => session.cutPlayback()),
+    [takes, session],
   );
   useEffect(() => {
     const changed = () => session.networkChanged();

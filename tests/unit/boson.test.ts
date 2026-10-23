@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import {
   BosonClient,
   SpeechSchema,
@@ -9,6 +9,17 @@ import {
 import { POST as speechRoute } from "../../src/app/api/voice-preview/route";
 import { POST as avatarRoute } from "../../src/app/api/avatar/route";
 import { POST as sessionRoute } from "../../src/app/api/realtime/session/route";
+import { TakeService } from "../../src/server/takes";
+import { client } from "../../src/server/http";
+let service: TakeService;
+beforeEach(() => {
+  service = new TakeService(":memory:", {
+    createVideo: (v) => client().createVideo(v),
+    video: (id) => client().video(id),
+    content: (id, range) => client().content(id, range),
+  });
+  (globalThis as any).directorTakes = service;
+});
 const input = {
   ref_image: "https://docs.boson.ai/public/avatar/sample.jpg",
   input_tts: { text: "I didn't do it.", emotion: "fear" as const },
@@ -20,6 +31,8 @@ const response = (
   headers: Record<string, string> = {},
 ) => Response.json(value, { status, headers });
 afterEach(() => {
+  service.db.close();
+  delete (globalThis as any).directorTakes;
   vi.unstubAllGlobals();
   vi.unstubAllEnvs();
 });

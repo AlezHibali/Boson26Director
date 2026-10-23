@@ -1,4 +1,4 @@
-import { commandFromTool } from "./tools";
+import { commandFromTool, effectSchemas } from "./tools";
 import type {
   Command,
   CommandResult,
@@ -14,7 +14,17 @@ export type ToolLog = {
   revision: number;
   cached?: boolean;
 };
-type Output = CommandResult & { scene: SceneState };
+export type EffectHandler = (
+  name: string,
+  args: Record<string, unknown>,
+  callId: string,
+  signal: AbortSignal,
+) => Promise<CommandResult & { takeId?: string; status?: string }>;
+type Output = CommandResult & {
+  scene: SceneState;
+  takeId?: string;
+  status?: string;
+};
 type Entry = { fingerprint: string; output?: Output; owner: string };
 export type ToolScope = {
   signal: AbortSignal;
@@ -36,6 +46,7 @@ export class ToolBridge {
   constructor(
     private deps: {
       getScene: () => SceneState;
+      effect?: EffectHandler;
       execute: (
         command: Command,
         signal: AbortSignal,
@@ -119,10 +130,18 @@ export class ToolBridge {
     // A provider repeating a call inside one response must not apply it twice.
     const unique = [...new Map(fresh.map((c) => [c.call_id, c])).values()];
     const commands: SingleCommand[] = [];
+    const effects: { call: Call; args: Record<string, unknown> }[] = [];
     let invalid: Output | undefined;
     for (const call of unique) {
       try {
         if (call.arguments.length > 20000) throw new Error("INVALID_ARGUMENTS");
+        if (this.deps.effect && Object.hasOwn(effectSchemas, call.name)) {
+          const args = effectSchemas[
+            call.name as keyof typeof effectSchemas
+          ].parse(JSON.parse(call.arguments));
+          effects.push({ call, args });
+          continue;
+        }
         const command = commandFromTool(call.name, JSON.parse(call.arguments));
         if (command)
           commands.push(
@@ -142,11 +161,42 @@ export class ToolBridge {
         "CALL_ID_CONFLICT",
         "工具调用 ID 冲突或缓存已满，整组未执行。",
       );
+    if (effects.length && (effects.length !== 1 || unique.length !== 1))
+      invalid = this.output(
+        "MIXED_EFFECTS",
+        "表演与重拍须单独提交；请先完成片场调整，整组未执行。",
+      );
     let result: Output;
     if (!scope.active() || scope.signal.aborted)
       result = this.output("CANCELLED", "连接已变化，旧工具调用未执行。");
     else if (invalid) result = invalid;
-    else if (commands.length) {
+    else if (effects.length) {
+      const { call, args } = effects[0];
+      this.deps.log({
+        callId: call.call_id,
+        name: call.name,
+        arguments: call.arguments,
+        status: "working",
+        message: "正在保存 Take…",
+        revision: this.deps.getScene().revision,
+      });
+      try {
+        result = {
+          ...(await this.deps.effect!(
+            call.name,
+            args,
+            call.call_id,
+            scope.signal,
+          )),
+          scene: structuredClone(this.deps.getScene()),
+        };
+      } catch {
+        result = this.output(
+          "PERFORMANCE_ERROR",
+          "表演调用未确认；请检查历史，勿自动重试。",
+        );
+      }
+    } else if (commands.length) {
       unique.forEach((call) =>
         this.deps.log({
           callId: call.call_id,
